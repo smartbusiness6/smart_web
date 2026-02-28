@@ -1,225 +1,216 @@
-// src/components/RHScreen.tsx
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/redux/store'; // Assumer le même hook Redux
-import { selectAllUsers, selectUsersLoading } from '@/redux/selectors/user.selector';
-import { fetchProfessions } from '@/redux/slices/professionSlice';
-import { fetchUsers } from '@/redux/slices/userSlice';
-import { useAuth } from '../AuthContext'; // Assumer le même contexte Auth
-import { useNavigate } from 'react-router-dom'; // Pour la navigation web
-import PeopleIcon from '@mui/icons-material/People'; // Icons Material-UI pour web
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import EventBusyIcon from '@mui/icons-material/EventBusy';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import './rh.css'; // Importer le CSS
+// src/pages/rh/RHScreen.tsx
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import {
+  fetchAllUsers,
+  // fetchAbsents,     // décommente si besoin
+  // fetchPresents,
+} from '../../redux/slices/rhSlices';
+import {
+  selectAllUsers as selectAllUsersSelector,
+  selectUsersLoading as selectUsersLoadingSelector,
+} from '../../redux/selectors/rh.selector';
+import { useAuth } from '../../contexts/AuthContext';
 
-type FilterType = 'all' | 'admin' | 'simple';
+// Icônes depuis react-icons (collection fa = Font Awesome)
+import {
+  FaUsers,
+  FaMoneyBillWave,
+  FaCalendarTimes,
+  FaSearch,
+  FaTimes,
+  FaSyncAlt,
+  FaUserPlus,
+  FaChevronRight,
+} from 'react-icons/fa';
 
-const UnauthorizedModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
-  if (!visible) return null;
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Accès non autorisé</h2>
-        <p>Vous devez être administrateur pour accéder à cette page.</p>
-        <button onClick={onClose}>Fermer</button>
-      </div>
-    </div>
-  );
-};
+import './index.css';
+
+type FilterType = 'all' | 'admin' | 'employee';
 
 export default function RHScreen() {
   const dispatch = useAppDispatch();
-  const { user } = useAuth();
-  const users = useAppSelector(selectAllUsers);
-  const loading = useAppSelector(selectUsersLoading);
-  const [searchValue, setSearchValue] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [refreshing, setRefreshing] = useState(false);
-  const conges = useAppSelector((state) => state.conges); // Assumer le slice conges existe
-  const professions = useAppSelector((state) => state.professions);
-  const [errorAuthorization, setErrorAuthorization] = useState(false);
   const navigate = useNavigate();
+  const { user, token } = useAuth();
 
-  // Vérification ADMIN
+  const users = useAppSelector(selectAllUsersSelector);
+  const loading = useAppSelector(selectUsersLoadingSelector);
+
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [errorAuth, setErrorAuth] = useState(false);
+
+  // Vérification rôle ADMIN
   useEffect(() => {
     if (user?.role !== 'ADMIN') {
-      setErrorAuthorization(true);
+      setErrorAuth(true);
     }
   }, [user]);
 
-  // Chargement des données
+  // Chargement initial des données
   useEffect(() => {
-    if (user?.token) {
-      dispatch(fetchProfessions(user.token));
-      dispatch(fetchUsers(user.token));
+    if (token && !errorAuth) {
+      dispatch(fetchAllUsers(token));
     }
-  }, [user?.token, dispatch]);
+  }, [token, dispatch, errorAuth]);
 
-  // Calculs memoized
-  const { masseSalariale, enConge, filteredData } = useMemo(() => {
-    let filtered = users;
+  // Filtrage + calculs memo
+  const { filteredUsers, totalSalary, onLeaveCount } = useMemo(() => {
+    let list = users || [];
 
     // Filtre par rôle
-    if (activeFilter === 'admin') filtered = filtered.filter((u) => u.role === 'ADMIN');
-    if (activeFilter === 'simple') filtered = filtered.filter((u) => u.role !== 'ADMIN');
+    if (filter === 'admin') list = list.filter((u) => u.role === 'ADMIN');
+    if (filter === 'employee') list = list.filter((u) => u.role !== 'ADMIN');
 
     // Recherche par nom
-    if (searchValue) {
-      filtered = filtered.filter((u) => u.nom.toLowerCase().includes(searchValue.toLowerCase()));
+    if (search.trim()) {
+      const term = search.toLowerCase().trim();
+      list = list.filter((u) => u.nom?.toLowerCase().includes(term));
     }
 
-    const masse = filtered.reduce((sum, u) => sum + u.profession.salaire, 0);
-    const congesCount = filtered.filter((u) => u.conges.some((c) => new Date(c.dateFin) >= new Date())).length;
+    const salarySum = list.reduce((sum, u) => sum + (u.profession?.salaire || 0), 0);
+    const onLeave = list.filter((u) =>
+      u.conges?.some((c) => new Date(c.dateFin) >= new Date())
+    ).length;
 
     return {
-      masseSalariale: masse,
-      enConge: congesCount,
-      filteredData: filtered,
+      filteredUsers: list,
+      totalSalary: salarySum,
+      onLeaveCount: onLeave,
     };
-  }, [users, activeFilter, searchValue]);
+  }, [users, filter, search]);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    if (user?.token) {
-      await Promise.all([
-        dispatch(fetchUsers(user.token)),
-        dispatch(fetchProfessions(user.token)),
-      ]);
-    }
-    setRefreshing(false);
+  const handleRefresh = () => {
+    if (token) dispatch(fetchAllUsers(token));
   };
 
-  const navigateToAdd = () => navigate('/rh/add');
-  const navigateToDetail = (userId: number) => navigate(`/rh/${userId}`);
-  const navigateToProfessions = () => navigate('/profession/list');
-
-  if (loading || refreshing) {
+  if (loading) {
     return (
-      <div className="loading-container">
-        <div className="spinner" /> {/* Simple spinner CSS */}
-        <p className="loading-text">Chargement des employés...</p>
+      <div className="rh-loading">
+        <div className="spinner" />
+        <p>Chargement de l'équipe...</p>
+      </div>
+    );
+  }
+
+  if (errorAuth) {
+    return (
+      <div className="rh-unauthorized">
+        <h2>Accès restreint</h2>
+        <p>Cette section est réservée aux administrateurs.</p>
+        <button onClick={() => navigate('/')}>Retour à l'accueil</button>
       </div>
     );
   }
 
   return (
-    <div className="rh-container">
-      <div className="stats-grid">
-        <div className="stat-card stat-card-primary">
-          <PeopleIcon className="stat-icon" />
-          <p className="stat-number">{users.length}</p>
-          <p className="stat-label">Effectif total</p>
+    <div className="rh-page">
+      <header className="rh-header">
+        <h1>Gestion RH</h1>
+        <button className="btn-refresh" onClick={handleRefresh} title="Rafraîchir">
+          <FaSyncAlt />
+        </button>
+      </header>
+
+      <div className="stats-row">
+        <div className="stat-card primary">
+          <FaUsers className="stat-icon" />
+          <div className="stat-content">
+            <span className="stat-value">{users?.length || 0}</span>
+            <span className="stat-label">Collaborateurs</span>
+          </div>
         </div>
-        <div className="stat-card stat-card-success">
-          <AccountBalanceWalletIcon className="stat-icon" />
-          <p className="stat-number">{masseSalariale.toLocaleString()} Ar</p>
-          <p className="stat-label">Masse salariale</p>
+
+        <div className="stat-card success">
+          <FaMoneyBillWave className="stat-icon" />
+          <div className="stat-content">
+            <span className="stat-value">{totalSalary.toLocaleString()} Ar</span>
+            <span className="stat-label">Masse salariale</span>
+          </div>
         </div>
-        <div className="stat-card stat-card-warning">
-          <EventBusyIcon className="stat-icon" />
-          <p className="stat-number">{conges.conges.length}</p> {/* Adapter si nécessaire */}
-          <p className="stat-label">En congé</p>
-        </div>
-        <div className="stat-card stat-card-warning clickable" onClick={navigateToProfessions}>
-          <EventBusyIcon className="stat-icon" />
-          <p className="stat-number">{professions.ids.length}</p>
-          <p className="stat-label">Professions</p>
+
+        <div className="stat-card warning">
+          <FaCalendarTimes className="stat-icon" />
+          <div className="stat-content">
+            <span className="stat-value">{onLeaveCount}</span>
+            <span className="stat-label">En congé</span>
+          </div>
         </div>
       </div>
 
-      <div className="search-container">
-        <div className="search-box">
-          <SearchIcon className="search-icon" />
+      <div className="controls-bar">
+        <div className="search-wrapper">
+          <FaSearch className="search-icon" />
           <input
             type="text"
-            className="search-input"
-            placeholder="Rechercher un employé..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Rechercher un collaborateur..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          {searchValue.length > 0 && (
-            <ClearIcon className="clear-icon" onClick={() => setSearchValue('')} />
-          )}
+          {search && <FaTimes className="clear-btn" onClick={() => setSearch('')} />}
+        </div>
+
+        <div className="filter-group">
+          <button
+            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+            onClick={() => setFilter('all')}
+          >
+            Tous
+          </button>
+          <button
+            className={`filter-btn ${filter === 'admin' ? 'active' : ''}`}
+            onClick={() => setFilter('admin')}
+          >
+            Admins
+          </button>
+          <button
+            className={`filter-btn ${filter === 'employee' ? 'active' : ''}`}
+            onClick={() => setFilter('employee')}
+          >
+            Employés
+          </button>
         </div>
       </div>
 
-      <div className="filter-container">
-        <button
-          className={`filter-chip ${activeFilter === 'all' ? 'active-chip' : ''}`}
-          onClick={() => setActiveFilter('all')}
-        >
-          Tous
-        </button>
-        <button
-          className={`filter-chip ${activeFilter === 'admin' ? 'active-chip' : ''}`}
-          onClick={() => setActiveFilter('admin')}
-        >
-          Admins
-        </button>
-        <button
-          className={`filter-chip ${activeFilter === 'simple' ? 'active-chip' : ''}`}
-          onClick={() => setActiveFilter('simple')}
-        >
-          Employés
-        </button>
-      </div>
-
-      <div className="list">
-        {filteredData.length === 0 ? (
-          <div className="empty-state">
-            <SearchIcon className="empty-icon" />
-            <p className="empty-text">Aucun employé trouvé</p>
-          </div>
-        ) : (
-          filteredData.map((emp) => (
+      {filteredUsers.length === 0 ? (
+        <div className="empty-state">
+          <FaSearch className="empty-icon" />
+          <p>Aucun collaborateur ne correspond à votre recherche</p>
+        </div>
+      ) : (
+        <div className="staff-grid">
+          {filteredUsers.map((emp) => (
             <div
               key={emp.id}
-              className="employee-card"
-              onClick={() => navigateToDetail(emp.id)}
+              className="staff-card"
+              onClick={() => navigate(`/rh/${emp.id}`)}
             >
-              <div className="employee-info">
-                <div className="avatar">
-                  <span className="avatar-text">{emp.nom.charAt(0).toUpperCase()}</span>
-                </div>
-                <div>
-                  <p className="employee-name">{emp.nom}</p>
-                  <p className="employee-role">{emp.profession.poste}</p>
-                  <p className="employee-salary">
-                    {emp.profession.salaire.toLocaleString()} Ar/mois
-                  </p>
-                </div>
+              <div className="staff-avatar">
+                {emp.nom?.charAt(0)?.toUpperCase() || '?'}
               </div>
-              <div className="employee-right">
-                {emp.conges.some((c) => new Date(c.dateFin) >= new Date()) && (
-                  <div className="leave-badge">
-                    <EventBusyIcon className="leave-icon" />
-                    <span className="leave-text">Congé</span>
-                  </div>
+
+              <div className="staff-main">
+                <h3 className="staff-name">{emp.nom || '—'}</h3>
+                <p className="staff-poste">{emp.profession?.poste || '—'}</p>
+                <p className="staff-salary">
+                  {emp.profession?.salaire?.toLocaleString() || '—'} Ar/mois
+                </p>
+              </div>
+
+              <div className="staff-status">
+                {emp.conges?.some((c) => new Date(c.dateFin) >= new Date()) && (
+                  <span className="badge-conge">Congé</span>
                 )}
-                <ChevronRightIcon className="chevron-icon" />
+                <FaChevronRight className="chevron" />
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <UnauthorizedModal
-        visible={errorAuthorization}
-        onClose={() => {
-          setErrorAuthorization(false);
-          navigate('/');
-        }}
-      />
-
-      <button className="fab" onClick={navigateToAdd}>
-        <PersonAddIcon className="fab-icon" />
-      </button>
-
-      <button className="refresh-button" onClick={onRefresh}>
-        Rafraîchir
+      <button className="fab-add" onClick={() => navigate('/rh/add')}>
+        <FaUserPlus />
       </button>
     </div>
   );
