@@ -349,14 +349,14 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(19, 230, 219, 0.701);
   font-family: 'DM Mono', monospace;
 }
 
 .chart-card__subtitle {
   font-family: 'DM Mono', monospace;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(10, 248, 212, 0.885);
 }
 
 .chart-card__live-badge {
@@ -558,5 +558,31 @@ body {
 
   .chart-card__amount-value {
     font-size: 28px;
+  }
+}
+
+
+/* Nouveau conteneur pour le dashboard sans topbar */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: slideIn 0.4s ease;
+}
+
+/* Ajustements pour que le dashboard s'intègre bien avec le layout */
+.dashboard-content .kpi-grid {
+  margin-top: 0;
+}
+
+/* Animation d'entrée */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

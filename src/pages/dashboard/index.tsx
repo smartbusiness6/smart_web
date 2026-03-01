@@ -1,26 +1,22 @@
+// src/pages/dashboard/index.tsx
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // ─── react-icons ─────────────────────────────────────────────────────────────
 import {
   LuActivity,
-  LuMenu,
   LuPackage,
   LuReceiptText,
-  LuRefreshCw,
   LuShoppingCart,
   LuTriangleAlert,
   LuTrendingDown,
   LuTrendingUp,
-  LuX,
 } from "react-icons/lu";
 
 // ─── recharts ────────────────────────────────────────────────────────────────
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import BASE_URL from "../../config/ApiConfig";
-// ─── Sidebar + styles ─────────────────────────────────────────────────────────
-import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -224,12 +220,11 @@ function KpiCard({ title, value, icon: Icon, accent, variation, variationType, o
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const {user,token} = useAuth();
+  const {user, token} = useAuth();
   const navigate = useNavigate();
 
   const [loading,     setLoading]     = useState(true);
   const [refreshing,  setRefreshing]  = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error,       setError]       = useState<string | null>(null);
 
   const [data, setData] = useState<DashboardData>({
@@ -294,7 +289,7 @@ export default function Dashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [token!]);
+  }, [token]);
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
@@ -347,144 +342,92 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="dash-layout">
+    <div className="dashboard-content">
+      {/* KPI Grid */}
+      <div className="kpi-grid">
+        {kpis.map((card) => (
+          <KpiCard key={card.title} {...card} />
+        ))}
+      </div>
 
-      {/* ── Sidebar (composant séparé) ──────────────────────────────────── */}
-      <Sidebar
-        alertesStock={data.alertesStock}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        userName={user?.nom!}
-      />
+      {/* CA Chart Card */}
+      <div className="chart-card">
+        <div className="chart-card__glow-top" />
+        <div className="chart-card__glow-bottom" />
 
-      {/* ── Topbar ─────────────────────────────────────────────────────── */}
-      <header className="topbar">
-        <div className="topbar__left">
-          <button
-            className="topbar__menu-btn"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label="Toggle menu"
-          >
-            {sidebarOpen ? <LuX size={18} /> : <LuMenu size={18} />}
-          </button>
-          <div>
-            <div className="topbar__title">Tableau de bord</div>
-            <div className="topbar__subtitle">
-              {caData.mois ||
-                new Date().toLocaleDateString("fr-FR", {
-                  month: "long",
-                  year: "numeric",
-                })}
+        <div className="chart-card__header">
+          <div className="chart-card__title-group">
+            <div className="chart-card__dot-row">
+              <div className="chart-card__dot" />
+              <span className="chart-card__label">Chiffre d'affaires</span>
             </div>
+            <span className="chart-card__subtitle">
+              Revenus journaliers — {caData.mois}
+            </span>
+          </div>
+          <div className="chart-card__live-badge">
+            <LuActivity size={14} />
+            Live
           </div>
         </div>
 
-        <div className="topbar__right">
-          {error && (
-            <span className="topbar__demo-badge">Démo</span>
-          )}
-          <button
-            className={`topbar__refresh-btn${refreshing ? " topbar__refresh-btn--spinning" : ""}`}
-            onClick={() => { setRefreshing(true); fetchDashboard(); }}
-            disabled={refreshing}
-          >
-            <LuRefreshCw size={14} />
-            {refreshing ? "Actualisation…" : "Actualiser"}
-          </button>
+        <div className="chart-card__amount">
+          <span className="chart-card__amount-value">
+            {caData.totalMois.toLocaleString("fr-FR")}
+          </span>
+          <span className="chart-card__amount-unit">Ar</span>
+          <div className="chart-card__stats-row">
+            <span className="chart-card__stat">
+              ↑ Max {fmtAr(Math.max(...caData.jours.map((d) => d.ca), 1))} Ar
+            </span>
+            <span className="chart-card__stat">
+              ~ Moy {fmtAr(Math.round(caData.totalMois / Math.max(caData.jours.length, 1)))} Ar
+            </span>
+          </div>
         </div>
-      </header>
 
-      {/* ── Main ───────────────────────────────────────────────────────── */}
-      <main className="main-content">
+        <CaLineChart jours={caData.jours} />
+      </div>
 
-        {/* KPI Grid */}
-        <div className="kpi-grid">
-          {kpis.map((card) => (
-            <KpiCard key={card.title} {...card} />
+      {/* Bottom row */}
+      <div className="bottom-row">
+        {/* Revenus hebdo */}
+        <div className="bottom-card">
+          <div className="bottom-card__title">Revenus hebdomadaires</div>
+          <div className="hebdo-card__amount">
+            {data.revenusHebdo.toLocaleString("fr-FR")}
+            <span className="hebdo-card__amount-unit">Ar</span>
+          </div>
+          <div className="hebdo-card__bar-track">
+            <div className="hebdo-card__bar-fill" />
+          </div>
+          <div className="hebdo-card__caption">65% de l'objectif mensuel</div>
+        </div>
+
+        {/* Stock status */}
+        <div className="bottom-card">
+          <div className="bottom-card__title stock-card__title">Statut du stock</div>
+          {stockItems.map((item) => (
+            <div key={item.label} className="stock-item">
+              <div className="stock-item__row">
+                <span className="stock-item__label">{item.label}</span>
+                <span className="stock-item__value" style={{ color: item.color }}>
+                  {item.value}
+                </span>
+              </div>
+              <div className="stock-item__bar-track">
+                <div
+                  className="stock-item__bar-fill"
+                  style={{
+                    width: `${Math.min(item.pct, 100)}%`,
+                    background: item.color,
+                  }}
+                />
+              </div>
+            </div>
           ))}
         </div>
-
-        {/* CA Chart Card */}
-        <div className="chart-card">
-          <div className="chart-card__glow-top" />
-          <div className="chart-card__glow-bottom" />
-
-          <div className="chart-card__header">
-            <div className="chart-card__title-group">
-              <div className="chart-card__dot-row">
-                <div className="chart-card__dot" />
-                <span className="chart-card__label">Chiffre d'affaires</span>
-              </div>
-              <span className="chart-card__subtitle">
-                Revenus journaliers — {caData.mois}
-              </span>
-            </div>
-            <div className="chart-card__live-badge">
-              <LuActivity size={14} />
-              Live
-            </div>
-          </div>
-
-          <div className="chart-card__amount">
-            <span className="chart-card__amount-value">
-              {caData.totalMois.toLocaleString("fr-FR")}
-            </span>
-            <span className="chart-card__amount-unit">Ar</span>
-            <div className="chart-card__stats-row">
-              <span className="chart-card__stat">
-                ↑ Max {fmtAr(Math.max(...caData.jours.map((d) => d.ca), 1))} Ar
-              </span>
-              <span className="chart-card__stat">
-                ~ Moy {fmtAr(Math.round(caData.totalMois / Math.max(caData.jours.length, 1)))} Ar
-              </span>
-            </div>
-          </div>
-
-          <CaLineChart jours={caData.jours} />
-        </div>
-
-        {/* Bottom row */}
-        <div className="bottom-row">
-
-          {/* Revenus hebdo */}
-          <div className="bottom-card">
-            <div className="bottom-card__title">Revenus hebdomadaires</div>
-            <div className="hebdo-card__amount">
-              {data.revenusHebdo.toLocaleString("fr-FR")}
-              <span className="hebdo-card__amount-unit">Ar</span>
-            </div>
-            <div className="hebdo-card__bar-track">
-              <div className="hebdo-card__bar-fill" />
-            </div>
-            <div className="hebdo-card__caption">65% de l'objectif mensuel</div>
-          </div>
-
-          {/* Stock status */}
-          <div className="bottom-card">
-            <div className="bottom-card__title stock-card__title">Statut du stock</div>
-            {stockItems.map((item) => (
-              <div key={item.label} className="stock-item">
-                <div className="stock-item__row">
-                  <span className="stock-item__label">{item.label}</span>
-                  <span className="stock-item__value" style={{ color: item.color }}>
-                    {item.value}
-                  </span>
-                </div>
-                <div className="stock-item__bar-track">
-                  <div
-                    className="stock-item__bar-fill"
-                    style={{
-                      width: `${Math.min(item.pct, 100)}%`,
-                      background: item.color,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

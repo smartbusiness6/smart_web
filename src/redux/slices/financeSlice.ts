@@ -67,7 +67,7 @@ export const fetchGeneral = createAsyncThunk<Compte, string>(
   'finance/fetchGeneral',
   async (token, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${BASE_URL}/finance/general`, { // Assume endpoint based on getGeneral
+      const response = await fetch(`${BASE_URL}/finance/bilan/general`, { 
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -89,7 +89,7 @@ export const fetchAllTransactions = createAsyncThunk<Transaction[], string>(
   'finance/fetchAllTransactions',
   async (token, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${BASE_URL}/transactions/all`, { // Assume endpoint based on getAllTransactions
+      const response = await fetch(`${BASE_URL}/stock/mouvement`, { 
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

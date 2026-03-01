@@ -207,10 +207,10 @@ export default function FinanceScreen() {
         </div>
       )}
 
-      {account && (
+      {account?.montant && (
         <div className="account-summary">
           <h3>Solde actuel</h3>
-          <p className="solde-value">{account.montant.toLocaleString()} Ar</p>
+          <p className="solde-value">{account.montant.toLocaleString() || 0} Ar</p>
         </div>
       )}
     </div>
