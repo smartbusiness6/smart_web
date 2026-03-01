@@ -179,3 +179,24 @@ export interface BonCommande{
   paiement: "CASH" | "CREDIT";
   transport:number;
 }
+
+export interface BonCommandeData {
+  produit: {
+    numero: string;
+    nom: string;
+    type: string;
+    prixAchat: number;
+    prixVente: number;
+    quantite: number;
+    idEntreprise: number;
+  };
+  fournisseur: {
+    nom: string;
+    telephone: string;
+    nif: string;
+    stat: string;
+    email: string;
+  };
+  paiement: 'CASH' | 'CREDIT';
+  transport: number;
+}

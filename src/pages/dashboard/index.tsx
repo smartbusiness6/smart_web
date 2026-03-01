@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ─── react-icons ─────────────────────────────────────────────────────────────
 import {
@@ -224,6 +225,7 @@ function KpiCard({ title, value, icon: Icon, accent, variation, variationType, o
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const {user,token} = useAuth();
+  const navigate = useNavigate();
 
   const [loading,     setLoading]     = useState(true);
   const [refreshing,  setRefreshing]  = useState(false);
@@ -306,16 +308,19 @@ export default function Dashboard() {
       value: `${data.ventesJour.toLocaleString("fr-FR")} Ar`,
       icon: LuReceiptText, accent: "#4ade80",
       variation: data.variation || undefined, variationType: vt,
+      onClick: ()=> navigate("/vente"),
     },
     {
       title: "Commandes",
       value: data.totalCommandes.toLocaleString("fr-FR"),
       icon: LuShoppingCart, accent: "#60a5fa",
+      onClick: ()=> navigate("/vente"),
     },
     {
       title: "Produits en stock",
       value: data.totalProduits.toLocaleString("fr-FR"),
       icon: LuPackage, accent: "#a78bfa",
+      onClick: ()=> navigate("/stock"),
     },
     {
       title: "Alertes stock",
@@ -324,6 +329,7 @@ export default function Dashboard() {
       accent: data.alertesStock > 0 ? "#f87171" : "#6b7280",
       variation: data.alertesStock > 0 ? `${data.alertesStock} produit(s)` : "Tout est OK",
       variationType: data.alertesStock > 0 ? "negative" : "neutral",
+      onClick: ()=> navigate("/stock"),
     },
   ];
 

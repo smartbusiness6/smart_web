@@ -57,8 +57,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const navItems: NavItemProps[] = [
     { label: "Dashboard",  icon: LuLayoutDashboard, active: true, path: "/dashboard" },
-    { label: "Ventes",     icon: LuReceiptText, path: "/ventes" },
-    { label: "Commandes",  icon: LuShoppingCart, path: "/commandes" },
+    { label: "Ventes",     icon: LuReceiptText, path: "/vente" },
     { label: "Stock",      icon: LuPackage, path: "/stock" },
     { label: "Reports",    icon: LuTriangleAlert, badge: alertesStock, path: "/report" },
     { label: "Finance",    icon: LuWallet, path: "/finance" },

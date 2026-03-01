@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import rhReducer from './slices/rhSlices';
 import stockReducer from './slices/stockSlice';
 import financeReducer from './slices/financeSlice';
+import venteReducer from './slices/venteSlice';
 
 
 export const store = configureStore({
@@ -10,6 +11,7 @@ export const store = configureStore({
     rh: rhReducer,
     stock: stockReducer,
     finance: financeReducer,
+    vente: venteReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
