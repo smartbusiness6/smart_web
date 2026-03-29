@@ -4,6 +4,8 @@
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: #f0f5fb; /* Nouveau fond */
+  min-height: 100vh;
 }
 
 .wallet-header {
@@ -19,7 +21,7 @@
 }
 
 .wallet-header h1 .icon {
-  color: #4CAF50;
+  color: #2E86AB; /* Bleu primaire */
   font-size: 2rem;
 }
 
@@ -29,11 +31,11 @@
 }
 
 .solde-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2E86AB 0%, #17A8B8 100%); /* Nouveau gradient */
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(46, 134, 171, 0.2);
 }
 
 .solde-content {
@@ -104,7 +106,7 @@
 
 .action-btn.active {
   background: white;
-  color: #667eea;
+  color: #2E86AB; /* Bleu primaire */
   font-weight: bold;
 }
 
@@ -119,14 +121,14 @@
 
 .alert.error {
   background: #ffebee;
-  color: #c62828;
-  border-left: 4px solid #c62828;
+  color: #E05A5A; /* Rouge */
+  border-left: 4px solid #E05A5A;
 }
 
 .alert.success {
   background: #e8f5e9;
-  color: #2e7d32;
-  border-left: 4px solid #2e7d32;
+  color: #1B8A5A; /* Vert teal */
+  border-left: 4px solid #1B8A5A;
 }
 
 .stats-grid {
@@ -148,7 +150,7 @@
 
 .stat-icon {
   font-size: 2rem;
-  color: #667eea;
+  color: #2E86AB; /* Bleu primaire */
 }
 
 .stat-label {
@@ -210,7 +212,7 @@
 }
 
 .chart-toggle button.active {
-  background: #667eea;
+  background: #2E86AB; /* Bleu primaire */
   color: white;
 }
 
@@ -251,8 +253,8 @@
 }
 
 .tab.active {
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
+  color: #2E86AB; /* Bleu primaire */
+  border-bottom: 2px solid #2E86AB;
   font-weight: bold;
 }
 
@@ -261,8 +263,8 @@
 }
 
 .solde-info {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #e3f0f5; /* Fond bleu très clair */
+  color: #2E86AB; /* Bleu primaire */
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -280,7 +282,8 @@
   font-weight: 500;
 }
 
-.montant-input {
+.montant-input,
+.motif-input {
   width: 100%;
   padding: 12px;
   border: 2px solid #e0e0e0;
@@ -289,9 +292,11 @@
   transition: border-color 0.3s;
 }
 
-.montant-input:focus {
+.montant-input:focus,
+.motif-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #17A8B8; /* Cyan pour le focus */
+  box-shadow: 0 0 0 3px rgba(23, 168, 184, 0.1);
 }
 
 .submit-btn {
@@ -310,21 +315,21 @@
 }
 
 .submit-btn.depot {
-  background: #4CAF50;
+  background: #1B8A5A; /* Vert teal pour dépôt */
   color: white;
 }
 
 .submit-btn.depot:hover:not(:disabled) {
-  background: #45a049;
+  background: #146b45;
 }
 
 .submit-btn.retrait {
-  background: #f44336;
+  background: #E05A5A; /* Rouge pour retrait */
   color: white;
 }
 
 .submit-btn.retrait:hover:not(:disabled) {
-  background: #e53935;
+  background: #c53a3a;
 }
 
 .submit-btn:disabled {
@@ -388,19 +393,25 @@
 }
 
 .positif {
-  color: #4CAF50;
+  color: #1B8A5A; /* Vert teal pour positif */
   font-weight: bold;
   display: block;
 }
 
 .negatif {
-  color: #f44336;
+  color: #E05A5A; /* Rouge pour négatif */
   font-weight: bold;
   display: block;
 }
 
 .historique-solde {
   font-size: 0.8rem;
+  color: #999;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
   color: #999;
 }
 

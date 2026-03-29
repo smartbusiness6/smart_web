@@ -16,11 +16,11 @@ export interface UserAfterLoginData {
     role: "ADMIN" | "SUPERADMIN" | "USER",
     profession: {
         poste: string
+        entreprise: {
+            id: 0,
+            nom: string
+        }
     },
-    entreprise: {
-        id: 0,
-        nom: string
-    }
 }
 
 export interface Entreprise {
@@ -196,4 +196,64 @@ export interface Fournisseur {
 export interface TransactionCompte {
   montant: number,
   motif: string
+}
+
+// src/types/formation.types.ts
+export interface Formation {
+  id: number;
+  titre: string;
+  description: string | null;
+  miniature: string | null;
+  dureeMinutes: number;
+  estPublique: boolean;
+  idEntreprise: number | null;
+  createdAt: string;
+  updatedAt: string;
+  lecons?: Lecon[];
+  suivi?: SuiviFormation;
+}
+
+export interface Lecon {
+  id: number;
+  idFormation: number;
+  titre: string;
+  ordre: number;
+  format: 'TEXTE' | 'VIDEO' | 'IMAGE';
+  contenuTexte: string | null;
+  urlVideo: string | null;
+  urlImage: string | null;
+  paragraphes?: Paragraphe[];
+}
+
+export interface Paragraphe {
+  id: number;
+  titre: string;
+  texte: string;
+  fichierMedia: string;
+  idLecon: number;
+}
+
+export interface SuiviFormation {
+  id: number;
+  idUtilisateur: number;
+  idFormation: number;
+  statut: 'NON_COMMENCE' | 'EN_COURS' | 'TERMINE' | 'CERTIFIE';
+  progressionPourcent: number;
+  tempsPasseSecondes: number;
+  derniereLecon: number;
+  dateDebut: string | null;
+  dateCompletion: string | null;
+  certificatDelivre: boolean;
+  lienCertificat: string | null;
+}
+
+export interface CreateSuiviDTO {
+  idFormation: number;
+}
+
+export interface UpdateSuiviDTO {
+  progressionPourcent?: number;
+  tempsPasseSecondes?: number;
+  derniereLecon?: number;
+  statut?: 'NON_COMMENCE' | 'EN_COURS' | 'TERMINE' | 'CERTIFIE';
 }

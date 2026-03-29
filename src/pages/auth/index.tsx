@@ -5,8 +5,8 @@ import type { UserLoginData } from '../../models';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import './index.css';
+import logo from '../../assets/images/logo-smart.png'
 
-const LOGO_URL = '/assets/images/logo-smart.png';
 
 // Simple inline SVG icons (no external deps)
 const IconMail = () => (
@@ -52,11 +52,19 @@ export default function AuthScreen() {
       });
 
       const dataLogin: UserLoginData = await response.json();
+      console.log(dataLogin)
 
       if (dataLogin.success && dataLogin.data) {
         login({
           token: dataLogin.data.token,
-          user: dataLogin.data.user,
+          user: {
+            ...dataLogin.data.user,
+            profession: {
+              poste: dataLogin.data.user.profession.poste,
+              idEntreprise: dataLogin.data.user.profession.entreprise.id,
+              entreprise: dataLogin.data.user.profession.entreprise,
+            },
+          },
         });
       } else {
         setErrorMsg(dataLogin.message || 'Identifiants incorrects.');
@@ -81,13 +89,11 @@ export default function AuthScreen() {
       <div className="login-card">
         {/* Logo */}
         <div className="logo-container">
-          <img src={LOGO_URL} alt="Smart Business" className="logo" />
-          <h1 className="brand-title">Smart Business</h1>
+          <img src={logo} alt="Smart Business" className="logo" height={110} width={110} />
         </div>
-
         {/* Title */}
         <h2 className="login-title">
-          <span>Bienvenue</span> de retour
+          <span>Bienvenue</span>
         </h2>
 
         {/* Error */}

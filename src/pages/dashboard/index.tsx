@@ -1,8 +1,7 @@
-// src/pages/dashboard/index.tsx (version modifiée)
+// src/pages/dashboard/index.tsx — Smart Business · Thème Blanc
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Icônes...
 import {
   LuActivity,
   LuPackage,
@@ -13,14 +12,13 @@ import {
   LuTrendingUp,
 } from "react-icons/lu";
 
-// Recharts...
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import "./index.css";
 import { useAuth } from '../../contexts/AuthContext';
 import { useApi } from '../../hooks/useApi';
 
-// Fonctions utilitaires (inchangées)
+// ── Utilitaires ──────────────────────────────────────────────────────────────
 function isToday(dateStr: string | Date) {
   const d = new Date(dateStr);
   const n = new Date();
@@ -37,7 +35,7 @@ function fmtAr(n: number) {
   return String(n);
 }
 
-// Types...
+// ── Types ────────────────────────────────────────────────────────────────────
 interface DashboardData {
   revenusHebdo:   number;
   ventesJour:     number;
@@ -58,23 +56,37 @@ interface CaData {
   jours:     CaJour[];
 }
 
-// Custom Tooltip (inchangé)
+// ── Palette Smart Business ───────────────────────────────────────────────────
+const SB = {
+  blue:    "#2E86AB",
+  cyan:    "#17A8B8",
+  teal:    "#1B8A5A",
+  red:     "#E05A5A",
+  text1:   "#1a2940",
+  text2:   "#3d5a73",
+  text3:   "#7a95aa",
+  bg:      "#f4f7fa",
+  surface: "#ffffff",
+};
+
+// ── Custom Tooltip ───────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null;
   return (
     <div style={{
-      backgroundColor: "#0f1117",
-      border: "1px solid rgba(74,222,128,0.25)",
+      backgroundColor: SB.surface,
+      border: `1px solid rgba(46,134,171,0.22)`,
       borderRadius: "10px",
       padding: "12px",
+      boxShadow: "0 4px 16px rgba(46,134,171,0.14)",
     }}>
-      <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", margin: "0 0 4px 0" }}>
+      <p style={{ color: SB.text3, fontSize: "11px", margin: "0 0 4px 0" }}>
         Jour {label}
       </p>
-      <p style={{ 
-        color: "#4ade80", 
-        fontSize: "13px", 
-        fontWeight: "600", 
+      <p style={{
+        color: SB.cyan,
+        fontSize: "13px",
+        fontWeight: "600",
         margin: 0,
         fontFamily: "'DM Mono', monospace"
       }}>
@@ -84,12 +96,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-// CaLineChart (inchangé)
+// ── CaLineChart ──────────────────────────────────────────────────────────────
 function CaLineChart({ jours }: { jours: CaJour[] }) {
-  const chartData = jours.map((d) => ({
-    jour: d.jour,
-    revenu: d.ca,
-  }));
+  const chartData = jours.map((d) => ({ jour: d.jour, revenu: d.ca }));
 
   return (
     <div className="chart-card__chart">
@@ -97,58 +106,40 @@ function CaLineChart({ jours }: { jours: CaJour[] }) {
         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4ade80" stopOpacity={0.28} />
-              <stop offset="100%" stopColor="#4ade80" stopOpacity={0.01} />
+              <stop offset="0%"   stopColor={SB.cyan} stopOpacity={0.22} />
+              <stop offset="100%" stopColor={SB.cyan} stopOpacity={0.01} />
             </linearGradient>
           </defs>
-          <CartesianGrid 
-            horizontal={true} 
-            vertical={false} 
-            stroke="rgba(255,255,255,0.05)" 
+          <CartesianGrid
+            horizontal={true}
+            vertical={false}
+            stroke="rgba(46,134,171,0.08)"
           />
-          <XAxis 
-            dataKey="jour" 
-            axisLine={false} 
-            tickLine={false} 
-            tick={{ 
-              fontSize: 10, 
-              fill: "rgba(255,255,255,0.3)",
-              fontFamily: "'DM Mono', monospace"
-            }}
+          <XAxis
+            dataKey="jour"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: SB.text3, fontFamily: "'DM Mono', monospace" }}
             interval="preserveStartEnd"
             tickMargin={5}
           />
-          <YAxis 
+          <YAxis
             hide={false}
             axisLine={false}
             tickLine={false}
-            tick={{ 
-              fontSize: 10, 
-              fill: "rgba(255,255,255,0.25)",
-              fontFamily: "'DM Mono', monospace"
-            }}
+            tick={{ fontSize: 10, fill: SB.text3, fontFamily: "'DM Mono', monospace" }}
             tickFormatter={fmtAr}
             width={40}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Area 
-            type="monotone" 
-            dataKey="revenu" 
-            stroke="#4ade80" 
+          <Area
+            type="monotone"
+            dataKey="revenu"
+            stroke={SB.cyan}
             strokeWidth={2.5}
-            fill="url(#revenueGradient)" 
-            dot={{ 
-              r: 3, 
-              fill: "#4ade80", 
-              stroke: "#0a1a10", 
-              strokeWidth: 2 
-            }}
-            activeDot={{ 
-              r: 6, 
-              fill: "#4ade80", 
-              stroke: "#0a1a10", 
-              strokeWidth: 2 
-            }}
+            fill="url(#revenueGradient)"
+            dot={{ r: 3, fill: SB.cyan, stroke: SB.surface, strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: SB.cyan, stroke: SB.surface, strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -156,7 +147,7 @@ function CaLineChart({ jours }: { jours: CaJour[] }) {
   );
 }
 
-// KpiCard (inchangé)
+// ── KpiCard ──────────────────────────────────────────────────────────────────
 interface KpiCardProps {
   title:          string;
   value:          string | number;
@@ -174,10 +165,10 @@ function KpiCard({ title, value, icon: Icon, accent, variation, variationType, o
   return (
     <div
       className={`kpi-card${onClick ? " kpi-card--clickable" : ""}`}
-      style={{ borderColor: "rgba(255,255,255,0.06)" }}
+      style={{ borderColor: "rgba(46,134,171,0.14)" }}
       onClick={onClick}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = `${accent}44`; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)"; }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = `${accent}55`; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(46,134,171,0.14)"; }}
     >
       <div
         className="kpi-card__glow"
@@ -188,7 +179,7 @@ function KpiCard({ title, value, icon: Icon, accent, variation, variationType, o
         <span className="kpi-card__label">{title}</span>
         <div
           className="kpi-card__icon"
-          style={{ background: `${accent}18`, color: accent }}
+          style={{ background: `${accent}14`, color: accent }}
         >
           <Icon size={18} />
         </div>
@@ -210,15 +201,15 @@ function KpiCard({ title, value, icon: Icon, accent, variation, variationType, o
   );
 }
 
-// Dashboard principal avec useApi
+// ── Dashboard principal ──────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { get } = useApi();
 
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading]               = useState(true);
+  const [refreshing, setRefreshing]         = useState(false);
+  const [error, setError]                   = useState<string | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
 
   const [data, setData] = useState<DashboardData>({
@@ -234,49 +225,42 @@ export default function Dashboard() {
     setError(null);
     setSessionExpired(false);
     try {
-      // Utilisation du hook useApi qui gère automatiquement le 401
       const [alertes, produits, commandes, bilan, mouvements, caJournalier] = await Promise.all([
-        get<any[]>('stock/produit/alerts/'),      // 1. Alertes stock
-        get<any[]>('stock/produit'),              // 2. Produits
-        get<any[]>('vente/commande'),             // 3. Commandes
-        get<any>('finance/bilan/hebdo'),          // 4. Bilan hebdo
-        get<any[]>('stock/mouvement'),            // 5. Mouvements
-        get<any>('finance/ca-journalier-mois'),   // 6. CA du mois
+        get<any[]>('stock/produit/alerts/'),
+        get<any[]>('stock/produit'),
+        get<any[]>('vente/commande'),
+        get<any>('finance/bilan/hebdo'),
+        get<any[]>('stock/mouvement'),
+        get<any>('finance/ca-journalier-mois'),
       ]);
 
-      const ventes = mouvements.filter((v: any) => 
+      const ventes = mouvements.filter((v: any) =>
         v.type?.toString() === "SORTIE" && isToday(v.date)
       );
-      const sommeVente = ventes.reduce((s: number, v: any) => 
+      const sommeVente = ventes.reduce((s: number, v: any) =>
         s + (v.prixUnitaire || 0) * (v.quantite || 0), 0
       );
 
       setData({
-        revenusHebdo: bilan?.current?.ventes || 0,
-        ventesJour: sommeVente,
-        totalProduits: produits.length,
-        alertesStock: alertes.length,
+        revenusHebdo:   bilan?.current?.ventes || 0,
+        ventesJour:     sommeVente,
+        totalProduits:  produits.length,
+        alertesStock:   alertes.length,
         totalCommandes: commandes.length,
-        variation: bilan?.variation?.ca || "",
+        variation:      bilan?.variation?.ca || "",
       });
 
       setCaData(caJournalier);
     } catch (err) {
       console.error('Erreur lors du chargement du dashboard:', err);
-      
-      // Vérifier si c'est une erreur de session
+
       if (err instanceof Error && err.message.includes('Session expirée')) {
         setSessionExpired(true);
       } else {
         setError("Impossible de charger les données. Utilisation des données de démonstration.");
-        // Mock data comme fallback
         setData({
-          revenusHebdo: 14_800_000,
-          ventesJour: 3_250_000,
-          totalProduits: 148,
-          alertesStock: 7,
-          totalCommandes: 64,
-          variation: "+12.4%",
+          revenusHebdo: 14_800_000, ventesJour: 3_250_000, totalProduits: 148,
+          alertesStock: 7, totalCommandes: 64, variation: "+12.4%",
         });
         setCaData({
           mois: "Février 2026",
@@ -293,17 +277,11 @@ export default function Dashboard() {
     }
   }, [get]);
 
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  // Redirection si session expirée
-  const {logout} = useAuth()
+  const { logout } = useAuth();
   useEffect(() => {
-
-    if (sessionExpired) {
-      logout()
-    }
+    if (sessionExpired) logout();
   }, [sessionExpired, navigate]);
 
   const vt =
@@ -314,27 +292,27 @@ export default function Dashboard() {
     {
       title: "Ventes du jour",
       value: `${data.ventesJour.toLocaleString("fr-FR")} Ar`,
-      icon: LuReceiptText, accent: "#4ade80",
+      icon: LuReceiptText, accent: SB.teal,
       variation: data.variation || undefined, variationType: vt,
       onClick: () => navigate("/vente"),
     },
     {
       title: "Commandes",
       value: data.totalCommandes.toLocaleString("fr-FR"),
-      icon: LuShoppingCart, accent: "#60a5fa",
+      icon: LuShoppingCart, accent: SB.blue,
       onClick: () => navigate("/vente"),
     },
     {
       title: "Produits en stock",
       value: data.totalProduits.toLocaleString("fr-FR"),
-      icon: LuPackage, accent: "#a78bfa",
+      icon: LuPackage, accent: SB.cyan,
       onClick: () => navigate("/stock"),
     },
     {
       title: "Alertes stock",
       value: data.alertesStock,
       icon: LuTriangleAlert,
-      accent: data.alertesStock > 0 ? "#f87171" : "#6b7280",
+      accent: data.alertesStock > 0 ? SB.red : SB.text3,
       variation: data.alertesStock > 0 ? `${data.alertesStock} produit(s)` : "Tout est OK",
       variationType: data.alertesStock > 0 ? "negative" : "neutral",
       onClick: () => navigate("/stock"),
@@ -342,16 +320,17 @@ export default function Dashboard() {
   ];
 
   const stockItems = [
-    { label: "Produits actifs", value: data.totalProduits, color: "#4ade80", pct: 85 },
-    { 
-      label: "Alertes critiques", 
-      value: data.alertesStock, 
-      color: "#f87171", 
-      pct: data.totalProduits > 0 ? Math.round((data.alertesStock / data.totalProduits) * 100) : 0 
+    { label: "Produits actifs",        value: data.totalProduits,  color: SB.teal, pct: 85 },
+    {
+      label: "Alertes critiques",
+      value: data.alertesStock,
+      color: SB.red,
+      pct: data.totalProduits > 0 ? Math.round((data.alertesStock / data.totalProduits) * 100) : 0,
     },
-    { label: "Commandes en cours", value: data.totalCommandes, color: "#60a5fa", pct: 70 },
+    { label: "Commandes en cours", value: data.totalCommandes, color: SB.blue, pct: 70 },
   ];
 
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="dash-loading">
@@ -361,11 +340,12 @@ export default function Dashboard() {
     );
   }
 
+  // ── Session expirée ──────────────────────────────────────────────────────
   if (sessionExpired) {
     return (
       <div className="dash-session-expired">
         <div className="session-expired-card">
-          <LuTriangleAlert size={48} color="#f87171" />
+          <LuTriangleAlert size={48} color={SB.red} />
           <h2>Session expirée</h2>
           <p>Votre session a expiré. Vous allez être redirigé vers la page de connexion.</p>
           <div className="redirect-spinner" />
@@ -374,6 +354,7 @@ export default function Dashboard() {
     );
   }
 
+  // ── Rendu principal ──────────────────────────────────────────────────────
   return (
     <div className="dashboard-content">
       {error && (
@@ -439,10 +420,7 @@ export default function Dashboard() {
             <span className="hebdo-card__amount-unit">Ar</span>
           </div>
           <div className="hebdo-card__bar-track">
-            <div 
-              className="hebdo-card__bar-fill" 
-              style={{ width: '65%' }}
-            />
+            <div className="hebdo-card__bar-fill" style={{ width: '65%' }} />
           </div>
           <div className="hebdo-card__caption">65% de l'objectif mensuel</div>
         </div>
@@ -461,10 +439,7 @@ export default function Dashboard() {
               <div className="stock-item__bar-track">
                 <div
                   className="stock-item__bar-fill"
-                  style={{
-                    width: `${Math.min(item.pct, 100)}%`,
-                    background: item.color,
-                  }}
+                  style={{ width: `${Math.min(item.pct, 100)}%`, background: item.color }}
                 />
               </div>
             </div>

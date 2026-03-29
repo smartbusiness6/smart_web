@@ -1,4 +1,5 @@
-// src/pages/stock/[id].tsx
+// src/pages/stock/[id].tsx - Version améliorée avec graphique différencié
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,9 +19,23 @@ import {
   LuCirclePlus,
   LuPen,
   LuCircleCheck,
-  LuCircleX
+  LuCircleX,
+  LuChartBar,
+  LuArrowUp,
+  LuArrowDown
 } from 'react-icons/lu';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { 
+  AreaChart, 
+  Area, 
+  CartesianGrid, 
+  ResponsiveContainer, 
+  Tooltip, 
+  XAxis, 
+  YAxis,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
 import BASE_URL from '../../config/ApiConfig';
 import './id.css';
 
@@ -55,25 +70,36 @@ interface Transaction {
   montant: number;
 }
 
-// Tooltip personnalisé pour le graphique
+// Tooltip personnalisé amélioré
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null;
   
   const date = new Date(label);
   const formattedDate = date.toLocaleDateString('fr-FR', { 
     day: 'numeric', 
-    month: 'short' 
+    month: 'long', 
+    year: 'numeric'
   });
 
   return (
     <div className="chart-tooltip">
       <p className="tooltip-date">{formattedDate}</p>
-      <p className="tooltip-value">
-        {payload[0].value.toLocaleString('fr-FR')} Ar
-      </p>
-      <p className="tooltip-label">
-        {payload[0].payload.type === 'ENTREE' ? 'Entrée' : 'Sortie'}
-      </p>
+      {payload.map((entry: any, index: number) => (
+        <div key={index} className="tooltip-entry">
+          <div className="tooltip-color" style={{ backgroundColor: entry.color }} />
+          <div className="tooltip-content">
+            <span className="tooltip-label">{entry.name}</span>
+            <span className="tooltip-value">
+              {entry.value.toLocaleString('fr-FR')} Ar
+            </span>
+            {entry.payload.quantite && (
+              <span className="tooltip-quantite">
+                ({entry.payload.quantite} unité{entry.payload.quantite > 1 ? 's' : ''})
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
@@ -89,6 +115,7 @@ export default function ProductDetailScreen() {
   const [activeTab, setActiveTab] = useState<'overview' | 'mouvements' | 'commandes'>('overview');
   const [refreshing, setRefreshing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [chartType, setChartType] = useState<'area' | 'bar'>('area');
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
 
@@ -160,7 +187,6 @@ export default function ProductDetailScreen() {
       });
 
       if (response.ok) {
-        // Mettre à jour l'état local
         setProduct(prev => {
           if (!prev) return prev;
           return {
@@ -176,16 +202,38 @@ export default function ProductDetailScreen() {
     }
   };
 
-  // Préparer les données pour le graphique
+  // Préparer les données pour le graphique - Version améliorée avec séparation entrées/sorties
   const chartData = product?.transactions
     ?.slice()
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map(t => ({
       date: t.date,
-      montant: t.montant,
-      type: t.type,
+      entree: t.type === 'ENTREE' ? t.montant : 0,
+      sortie: t.type === 'SORTIE' ? t.montant : 0,
       quantite: t.quantite,
+      type: t.type,
     })) || [];
+
+  // Agrégation des données par jour pour éviter trop de points
+  const aggregatedData = chartData.reduce((acc: any[], curr) => {
+    const dateKey = new Date(curr.date).toLocaleDateString('fr-FR');
+    const existing = acc.find(item => item.dateKey === dateKey);
+    
+    if (existing) {
+      existing.entree += curr.entree;
+      existing.sortie += curr.sortie;
+      existing.quantite += curr.quantite;
+    } else {
+      acc.push({
+        dateKey,
+        date: curr.date,
+        entree: curr.entree,
+        sortie: curr.sortie,
+        quantite: curr.quantite,
+      });
+    }
+    return acc;
+  }, []);
 
   // Calculer les statistiques
   const totalEntrees = product?.transactions
@@ -195,6 +243,14 @@ export default function ProductDetailScreen() {
   const totalSorties = product?.transactions
     ?.filter(t => t.type === 'SORTIE')
     .reduce((sum, t) => sum + t.quantite, 0) || 0;
+
+  const totalMontantEntrees = product?.transactions
+    ?.filter(t => t.type === 'ENTREE')
+    .reduce((sum, t) => sum + t.montant, 0) || 0;
+
+  const totalMontantSorties = product?.transactions
+    ?.filter(t => t.type === 'SORTIE')
+    .reduce((sum, t) => sum + t.montant, 0) || 0;
 
   const commandesEnAttente = product?.commandes
     ?.filter(c => !c.valide).length || 0;
@@ -255,7 +311,7 @@ export default function ProductDetailScreen() {
           
           <button 
             className="restock-button"
-            onClick={() => navigate(`/transaction/add/${id}`)}
+            onClick={() => navigate(`/stock/reapprovisionner/${id}`)}
           >
             <LuCirclePlus size={18} />
             Réapprovisionner
@@ -293,14 +349,14 @@ export default function ProductDetailScreen() {
           </div>
           <button 
             className="alert-action"
-            onClick={() => navigate(`/transaction/add/${id}`)}
+            onClick={() => navigate(`/stock/reapprovisionner/${id}`)}
           >
             Réapprovisionner
           </button>
         </div>
       )}
 
-      {/* KPI Cards */}
+      {/* KPI Cards améliorés */}
       <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-icon" style={{ background: 'rgba(5, 170, 101, 0.1)', color: '#05aa65' }}>
@@ -315,7 +371,7 @@ export default function ProductDetailScreen() {
 
         <div className="kpi-card">
           <div className="kpi-icon" style={{ background: 'rgba(52, 152, 219, 0.1)', color: '#3498db' }}>
-            <LuTrendingUp />
+            <LuDollarSign />
           </div>
           <div className="kpi-content">
             <span className="kpi-label">Prix de vente</span>
@@ -347,6 +403,26 @@ export default function ProductDetailScreen() {
         </div>
       </div>
 
+      {/* Statistiques supplémentaires */}
+      <div className="stats-row">
+        <div className="stat-card-small">
+          <LuTrendingUp className="stat-icon-success" />
+          <div>
+            <span className="stat-label-small">Total entrées</span>
+            <span className="stat-value-small">{totalEntrees.toLocaleString()} unités</span>
+            <span className="stat-sub">{totalMontantEntrees.toLocaleString()} Ar</span>
+          </div>
+        </div>
+        <div className="stat-card-small">
+          <LuTrendingDown className="stat-icon-danger" />
+          <div>
+            <span className="stat-label-small">Total sorties</span>
+            <span className="stat-value-small">{totalSorties.toLocaleString()} unités</span>
+            <span className="stat-sub">{totalMontantSorties.toLocaleString()} Ar</span>
+          </div>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="detail-tabs">
         <button
@@ -373,86 +449,151 @@ export default function ProductDetailScreen() {
       <div className="tab-content">
         {activeTab === 'overview' && (
           <div className="overview-tab">
-            {/* Graphique */}
+            {/* Graphique amélioré */}
             <div className="chart-card">
               <div className="chart-header">
-                <h3>Évolution des mouvements</h3>
-                <div className="chart-legend">
-                  <span className="legend-item">
-                    <span className="legend-dot" style={{ background: '#05aa65' }} />
-                    Montant (Ar)
-                  </span>
+                <h3>Évolution des mouvements financiers</h3>
+                <div className="chart-controls">
+                  <div className="chart-type-toggle">
+                    <button
+                      className={`chart-type-btn ${chartType === 'area' ? 'active' : ''}`}
+                      onClick={() => setChartType('area')}
+                    >
+                      <LuChartBar size={16} />
+                      Aire
+                    </button>
+                    <button
+                      className={`chart-type-btn ${chartType === 'bar' ? 'active' : ''}`}
+                      onClick={() => setChartType('bar')}
+                    >
+                      <LuChartBar size={16} />
+                      Barres
+                    </button>
+                  </div>
+                  <div className="chart-legend">
+                    <span className="legend-item">
+                      <span className="legend-dot" style={{ background: '#05aa65' }} />
+                      Entrées
+                    </span>
+                    <span className="legend-item">
+                      <span className="legend-dot" style={{ background: '#e74c3c' }} />
+                      Sorties
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="chart-container">
-                {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="montantGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#05aa65" stopOpacity={0.3} />
-                          <stop offset="100%" stopColor="#05aa65" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid horizontal={true} vertical={false} stroke="rgba(0,0,0,0.05)" />
-                      <XAxis 
-                        dataKey="date" 
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 11, fill: '#666' }}
-                        tickFormatter={(date) => new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                      />
-                      <YAxis 
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 11, fill: '#666' }}
-                        tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area 
-                        type="monotone" 
-                        dataKey="montant" 
-                        stroke="#05aa65" 
-                        strokeWidth={2}
-                        fill="url(#montantGradient)" 
-                      />
-                    </AreaChart>
+                {aggregatedData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={350}>
+                    {chartType === 'area' ? (
+                      <AreaChart data={aggregatedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="entreeGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#05aa65" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="#05aa65" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="sortieGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#e74c3c" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="#e74c3c" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid horizontal={true} vertical={false} stroke="rgba(0,0,0,0.05)" />
+                        <XAxis 
+                          dataKey="dateKey" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: '#666' }}
+                          interval="preserveStartEnd"
+                        />
+                        <YAxis 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: '#666' }}
+                          tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area 
+                          type="monotone" 
+                          dataKey="entree" 
+                          name="Entrées"
+                          stroke="#05aa65" 
+                          strokeWidth={2}
+                          fill="url(#entreeGradient)" 
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="sortie" 
+                          name="Sorties"
+                          stroke="#e74c3c" 
+                          strokeWidth={2}
+                          fill="url(#sortieGradient)" 
+                        />
+                      </AreaChart>
+                    ) : (
+                      <BarChart data={aggregatedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <CartesianGrid horizontal={true} vertical={false} stroke="rgba(0,0,0,0.05)" />
+                        <XAxis 
+                          dataKey="dateKey" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: '#666' }}
+                        />
+                        <YAxis 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: '#666' }}
+                          tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Bar dataKey="entree" name="Entrées" fill="#05aa65" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="sortie" name="Sorties" fill="#e74c3c" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    )}
                   </ResponsiveContainer>
                 ) : (
                   <div className="no-chart-data">
                     <LuBox size={48} />
                     <p>Aucune donnée à afficher</p>
+                    <button 
+                      className="restock-button"
+                      onClick={() => navigate(`/stock/reapprovisionner/${id}`)}
+                    >
+                      Ajouter un mouvement
+                    </button>
                   </div>
                 )}
               </div>
 
-              {/* Statistiques */}
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <LuTrendingUp className="stat-icon entrees" />
-                  <div className="stat-info">
-                    <span className="stat-label">Total entrées</span>
-                    <span className="stat-value">{totalEntrees.toLocaleString()}</span>
+              {/* Statistiques détaillées */}
+              <div className="stats-detailed">
+                <div className="stat-detailed-item">
+                  <LuArrowUp className="stat-icon-success" />
+                  <div>
+                    <span className="stat-label-detailed">Total entrées (quantité)</span>
+                    <span className="stat-value-detailed">{totalEntrees.toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="stat-item">
-                  <LuTrendingDown className="stat-icon sorties" />
-                  <div className="stat-info">
-                    <span className="stat-label">Total sorties</span>
-                    <span className="stat-value">{totalSorties.toLocaleString()}</span>
+                <div className="stat-detailed-item">
+                  <LuArrowDown className="stat-icon-danger" />
+                  <div>
+                    <span className="stat-label-detailed">Total sorties (quantité)</span>
+                    <span className="stat-value-detailed">{totalSorties.toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="stat-item">
-                  <LuDollarSign className="stat-icon ca" />
-                  <div className="stat-info">
-                    <span className="stat-label">CA total</span>
-                    <span className="stat-value">
-                      {product.transactions
-                        ?.filter(t => t.type === 'SORTIE')
-                        .reduce((sum, t) => sum + t.montant, 0)
-                        .toLocaleString()} Ar
-                    </span>
+                <div className="stat-detailed-item">
+                  <LuDollarSign className="stat-icon-success" />
+                  <div>
+                    <span className="stat-label-detailed">Valeur totale des entrées</span>
+                    <span className="stat-value-detailed">{totalMontantEntrees.toLocaleString()} Ar</span>
+                  </div>
+                </div>
+                <div className="stat-detailed-item">
+                  <LuDollarSign className="stat-icon-danger" />
+                  <div>
+                    <span className="stat-label-detailed">Valeur totale des sorties</span>
+                    <span className="stat-value-detailed">{totalMontantSorties.toLocaleString()} Ar</span>
                   </div>
                 </div>
               </div>
@@ -506,6 +647,7 @@ export default function ProductDetailScreen() {
           </div>
         )}
 
+        {/* Reste des tabs... */}
         {activeTab === 'mouvements' && (
           <div className="mouvements-tab">
             <div className="transactions-list">
@@ -541,6 +683,9 @@ export default function ProductDetailScreen() {
                         </span>
                         <span className="transaction-montant">
                           Montant: {transaction.montant.toLocaleString()} Ar
+                        </span>
+                        <span className="transaction-prix">
+                          Prix unitaire: {transaction.prixUnitaire.toLocaleString()} Ar
                         </span>
                       </div>
                     </div>

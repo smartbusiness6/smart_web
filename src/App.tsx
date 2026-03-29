@@ -31,6 +31,10 @@ import DepositScreen from "./pages/finance/wallet";
 import Wallet from "./pages/finance/wallet";
 import ForgotPassword from "./pages/auth/forgotPassword";
 import ResetPassword from "./pages/auth/resetPassword";
+import FormationPage from "./pages/formation";
+import DetailedFormationPage from "./pages/formation/id";
+import ReapprovisionnerScreen from "./pages/stock/approvisionnement";
+import ProfileStaff from "./pages/rh/profil";
 
 function App() {
   return (
@@ -112,6 +116,15 @@ function App() {
               />
 
               <Route
+                path="/stock/reapprovisionner/:id"
+                element={
+                  <ProtectedRoute requiredRole="ADMIN">
+                    <ReapprovisionnerScreen />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/finance"
                 element={
                   <ProtectedRoute>
@@ -168,6 +181,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AddCommandeForm />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path='/profil'
+                element={
+                  <ProtectedRoute>
+                    <ProfileStaff />
                   </ProtectedRoute>
                 }
               />
@@ -231,6 +253,24 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <HelpScreen />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/formation"
+                element={
+                  <ProtectedRoute>
+                    <FormationPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route 
+                path="/formation/:id"
+                element={
+                  <ProtectedRoute>
+                    <DetailedFormationPage/>
                   </ProtectedRoute>
                 }
               />

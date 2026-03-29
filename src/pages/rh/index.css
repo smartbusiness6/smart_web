@@ -1,24 +1,20 @@
 /* src/pages/rh/index.css - Version améliorée 2025 */
-
 :root {
-  --primary: #0ea5e9;
-  --primary-dark: #0369a1;
-  --primary-light: #e0f2fe;
-  --success: #10b981;
-  --success-light: #d1fae5;
+  --primary: #2E86AB;           /* Bleu acier */
+  --primary-dark: #17A8B8;      /* Cyan */
+  --accent: #1B8A5A;            /* Vert teal */
+  --success: #1B8A5A;
   --warning: #f59e0b;
-  --warning-light: #fed7aa;
-  --danger: #ef4444;
-  --danger-light: #fee2e2;
-  --text: #111827;
-  --text-secondary: #4b5563;
-  --text-light: #6b7280;
-  --bg: #f8fafc;
+  --danger: #E05A5A;
+  --text: #1e2937;
+  --text-secondary: #475569;
+  --text-light: #64748b;
+  --bg: #f4f7fa;
   --card: #ffffff;
   --border: #e2e8f0;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-  --shadow-hover: 0 20px 30px -10px rgba(14, 165, 233, 0.25);
+  --shadow-hover: 0 20px 30px -10px rgba(46, 134, 171, 0.25);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

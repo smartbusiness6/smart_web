@@ -3,7 +3,7 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 32px 24px;
-  background: #f9fafb;
+  background: #f0f5fb;
   min-height: 100vh;
 }
 
@@ -17,7 +17,7 @@
 .header h1 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #04957d;
+  color: #2E86AB;
 }
 
 .close-btn {
@@ -28,7 +28,7 @@
 }
 
 .close-btn:hover {
-  color: #04957d;
+  color: #2E86AB;
 }
 
 .form {
@@ -40,7 +40,7 @@
 h2 {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #04957d;
+  color: #2E86AB;
   margin-top: 16px;
   margin-bottom: 8px;
 }
@@ -57,17 +57,19 @@ label {
   color: #333;
 }
 
-input {
+input, select, textarea {
   padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border 0.2s;
+  transition: all 0.2s;
+  background: white;
 }
 
-input:focus {
-  border-color: #04957d;
+input:focus, select:focus, textarea:focus {
+  border-color: #17A8B8;
   outline: none;
+  box-shadow: 0 0 0 3px rgba(23, 168, 184, 0.1);
 }
 
 .payment-options {
@@ -88,14 +90,14 @@ input:focus {
 }
 
 .payment-btn.active {
-  background: #04957d;
+  background: #2E86AB;
   color: white;
 }
 
 .submit-btn {
   margin-top: 24px;
   padding: 14px;
-  background: #04957d;
+  background: #2E86AB;
   color: white;
   border: none;
   border-radius: 8px;
@@ -106,16 +108,19 @@ input:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .submit-btn:hover {
-  background: #037665;
+  background: #236b8a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 134, 171, 0.3);
 }
 
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .alert-modal {
@@ -128,6 +133,8 @@ input:focus {
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   text-align: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
 }
 
 .alert-modal p {
@@ -138,9 +145,40 @@ input:focus {
 
 .alert-modal button {
   padding: 12px 24px;
-  background: #04957d;
+  background: #2E86AB;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.alert-modal button:hover {
+  background: #236b8a;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .add-product-page {
+    padding: 20px 16px;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .payment-options {
+    flex-direction: column;
+  }
 }

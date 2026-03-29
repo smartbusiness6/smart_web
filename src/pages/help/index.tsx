@@ -256,10 +256,9 @@ export default function HelpScreen() {
                 <button className="back-btn" onClick={() => navigate(-1)}>
                     <FaArrowLeft />
                 </button>
-                <h1>
+                <span>
                     <FaBookOpen className="header-icon" />
-                    Centre d'aide
-                </h1>
+                </span>
                 <div className="header-actions">
                     <button
                         className="help-btn"

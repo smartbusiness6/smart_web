@@ -3,8 +3,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { fetchForSalesProducts, fetchProducts } from '../../../redux/slices/stockSlice';
+import { selectSalesProducts, selectSalesLoading } from '../../../redux/selectors/stock.selector';
 import { useAuth } from '../../../contexts/AuthContext';
-import { FaSearch, FaTimes, FaFilter, FaArrowLeft, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaFilter, FaArrowLeft, FaPlus, FaSyncAlt } from 'react-icons/fa';
 import ProductCard from '../../../components/Card/ProductCard';
 import './index.css';
 
@@ -13,19 +14,33 @@ export default function SelectProductsScreen() {
   const navigate = useNavigate();
   const { token } = useAuth();
   
-  const products = useAppSelector(state => state.stock.products) || [];
-  const loading = useAppSelector(state => state.stock.status === 'loading');
+  // Utiliser selectSalesProducts au lieu de state.stock.products
+  const products = useAppSelector(selectSalesProducts) || [];
+  const loading = useAppSelector(selectSalesLoading);
   
   const [searchValue, setSearchValue] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [visibleCount, setVisibleCount] = useState(15);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (token) {
-      dispatch(fetchForSalesProducts(token));
+      loadProducts();
     }
   }, [token, dispatch]);
+
+  const loadProducts = async () => {
+    if (token) {
+      setRefreshing(true);
+      await dispatch(fetchForSalesProducts(token));
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    loadProducts();
+  };
 
   const categories = useMemo(() => {
     const unique = new Set(products.map(p => p.type).filter(Boolean));
@@ -64,18 +79,11 @@ export default function SelectProductsScreen() {
     setVisibleCount(15);
   };
 
-  const handleRefresh = () => {
-    setVisibleCount(15);
-    if (token) {
-      dispatch(fetchProducts(token));
-    }
-  };
-
   if (loading && products.length === 0) {
     return (
       <div className="select-products-loading-container">
         <div className="spinner" />
-        <p>Chargement des produits...</p>
+        <p>Chargement des produits disponibles...</p>
       </div>
     );
   }
@@ -87,6 +95,13 @@ export default function SelectProductsScreen() {
           <FaArrowLeft />
         </button>
         <h1>Sélectionner un produit</h1>
+        <button 
+          className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <FaSyncAlt className={refreshing ? 'spin' : ''} />
+        </button>
       </div>
 
       <div className="select-products-top-bar">
@@ -113,15 +128,36 @@ export default function SelectProductsScreen() {
         </button>
       </div>
 
+      {/* Indicateur du nombre de produits disponibles */}
+      <div className="products-info">
+        <span className="products-count">
+          {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} disponible{filteredProducts.length > 1 ? 's' : ''}
+        </span>
+        {isFilterActive && (
+          <button className="reset-filters-link" onClick={resetFilters}>
+            Réinitialiser
+          </button>
+        )}
+      </div>
+
       <div className="select-products-list">
         {displayedProducts.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📦</div>
             <h3>{searchValue || activeCategory ? 'Aucun produit trouvé' : 'Aucun produit disponible'}</h3>
-            <p>Essayez de modifier la recherche ou les catégories</p>
+            <p>
+              {searchValue || activeCategory 
+                ? 'Essayez de modifier la recherche ou les catégories'
+                : 'Aucun produit n\'est actuellement en stock pour la vente'}
+            </p>
             {isFilterActive && (
               <button className="reset-filters-btn" onClick={resetFilters}>
                 Réinitialiser les filtres
+              </button>
+            )}
+            {!isFilterActive && products.length === 0 && (
+              <button className="empty-action" onClick={() => navigate('/stock/add')}>
+                <FaPlus /> Ajouter un produit
               </button>
             )}
           </div>

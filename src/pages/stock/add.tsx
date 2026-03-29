@@ -85,7 +85,7 @@ export default function AddProductScreen() {
       prix: Number(form.prix),
       vente: Number(form.vente),
       quantite: Number(form.quantite),
-      idEntreprise: user?.id!,
+      idEntreprise: user?.profession.idEntreprise!,
       nom_fournisseur: form.nom_fournisseur,
       telephone_fournisseur: form.telephone_fournisseur,
       nif: form.nif,
@@ -93,7 +93,7 @@ export default function AddProductScreen() {
       email_fournisseur: form.email_fournisseur,
       method: paymentMode,
       transport: Number(form.transport),
-      finalite: fpMode ? "MATIERE_PREMIERE" : "VENTE"
+      finalite: fpMode ? "VENTE" : "MATIERE_PREMIERE"
     };
 
     console.log({ data })

@@ -7,7 +7,7 @@
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #2d3748;
-  background: #f7fafc;
+  background: #f0f5fb; /* Nouveau fond */
 }
 
 /* Header & Tabs */
@@ -44,9 +44,9 @@
 }
 
 .fi-tabs button.active {
-  background: #3182ce;
+  background: #2E86AB; /* Bleu primaire */
   color: white;
-  box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+  box-shadow: 0 4px 6px rgba(46, 134, 171, 0.2);
 }
 
 /* Overview Cards */
@@ -63,6 +63,7 @@
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 .fi-card:hover {
@@ -84,11 +85,11 @@
 }
 
 .positive {
-  color: #38a169;
+  color: #1B8A5A; /* Vert teal pour positif */
 }
 
 .negative {
-  color: #e53e3e;
+  color: #E05A5A; /* Rouge pour négatif */
 }
 
 /* Sections */
@@ -111,8 +112,8 @@
 }
 
 .fi-year-badge {
-  background: #ebf8ff;
-  color: #3182ce;
+  background: #e3f0f5; /* Fond bleu très clair */
+  color: #2E86AB; /* Bleu primaire */
   font-size: 0.9rem;
   padding: 4px 12px;
   border-radius: 999px;
@@ -136,9 +137,9 @@
 }
 
 .fi-sub-tabs button.active {
-  background: #3182ce;
+  background: #2E86AB; /* Bleu primaire */
   color: white;
-  border-color: #3182ce;
+  border-color: #2E86AB;
 }
 
 /* Rows (Bilan & Résultat) */
@@ -161,11 +162,11 @@
 }
 
 .fi-row-value.neg {
-  color: #e53e3e;
+  color: #E05A5A; /* Rouge pour négatif */
 }
 
 .fi-row-value.pos {
-  color: #38a169;
+  color: #1B8A5A; /* Vert teal pour positif */
 }
 
 .fi-separator {
@@ -187,7 +188,7 @@
 }
 
 .fi-row-final-value {
-  color: #2b6cb0;
+  color: #2E86AB; /* Bleu primaire */
 }
 
 /* Transactions list */
@@ -211,13 +212,13 @@
 }
 
 .fi-tx-icon.entree {
-  background: #fefcbf;
-  color: #b7791f;
+  background: #fff3e0;
+  color: #E05A5A; /* Rouge pour sortie */
 }
 
 .fi-tx-icon.sortie {
-  background: #fed7d7;
-  color: #c53030;
+  background: #e8f5e9;
+  color: #1B8A5A; /* Vert teal pour entrée */
 }
 
 .fi-tx-ref {
@@ -238,11 +239,11 @@
 }
 
 .fi-tx-amount.pos {
-  color: #38a169;
+  color: #1B8A5A; /* Vert teal pour positif */
 }
 
 .fi-tx-amount.neg {
-  color: #e53e3e;
+  color: #E05A5A; /* Rouge pour négatif */
 }
 
 /* Pagination */
@@ -304,7 +305,7 @@
   width: 48px;
   height: 48px;
   border: 5px solid #e2e8f0;
-  border-top: 5px solid #3182ce;
+  border-top: 5px solid #2E86AB; /* Bleu primaire */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
@@ -327,11 +328,11 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #3182ce;
+  background: #2E86AB; /* Bleu primaire */
   color: white;
   font-size: 1.8rem;
   border: none;
-  box-shadow: 0 6px 16px rgba(49, 130, 206, 0.4);
+  box-shadow: 0 6px 16px rgba(46, 134, 171, 0.4);
   cursor: pointer;
   transition: all 0.25s ease;
   display: flex;
@@ -341,7 +342,7 @@
 
 .fi-fab:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(49, 130, 206, 0.35);
+  box-shadow: 0 12px 24px rgba(46, 134, 171, 0.35);
 }
 
 .fi-fab.loading {
@@ -368,6 +369,7 @@
 .fi-fab-wrap:hover .fi-fab-tooltip {
   opacity: 1;
 }
+
 .cr-ligne {
   display: flex;
   justify-content: space-between;
@@ -387,7 +389,7 @@
   font-weight: 700;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 2px solid #3182ce;
+  border-top: 2px solid #2E86AB; /* Bleu primaire */
 }
 
 .montant {
@@ -401,5 +403,9 @@
   margin-left: 12px;
 }
 
-.pos { color: #27ae60; }
-.neg { color: #c0392b; }
+.pos { 
+  color: #1B8A5A; /* Vert teal pour positif */
+}
+.neg { 
+  color: #E05A5A; /* Rouge pour négatif */
+}

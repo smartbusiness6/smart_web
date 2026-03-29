@@ -471,6 +471,7 @@ export default function StockScreen() {
                     className={`product-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => navigate(`/stock/${product.id}`)}
                   >
+                    {/* Checkbox + menu */}
                     <div className="product-card-header">
                       <div className="product-checkbox" onClick={(e) => e.stopPropagation()}>
                         <input
@@ -484,10 +485,12 @@ export default function StockScreen() {
                       </button>
                     </div>
 
+                    {/* Avatar */}
                     <div className="product-avatar">
                       <FaBoxOpen />
                     </div>
 
+                    {/* Nom + ref */}
                     <div className="product-info">
                       <h3 className="product-name">{product.nom}</h3>
                       <p className="product-ref">
@@ -496,11 +499,13 @@ export default function StockScreen() {
                       </p>
                     </div>
 
+                    {/* Catégorie */}
                     <div className="product-category">
                       <FaTag className="category-icon" />
                       {product.type}
                     </div>
 
+                    {/* Prix */}
                     <div className="product-prices">
                       <div className="price-item">
                         <span className="price-label">Achat</span>
@@ -512,6 +517,7 @@ export default function StockScreen() {
                       </div>
                     </div>
 
+                    {/* Stock + barre */}
                     <div className="product-stock">
                       <div className="stock-header">
                         <span className="stock-label">Stock</span>
@@ -525,14 +531,15 @@ export default function StockScreen() {
                           className="progress-fill"
                           style={{ 
                             width: `${progress}%`,
-                            backgroundColor: product.quantite < 10 ? '#f59e0b' : '#04957d'
+                            backgroundColor: product.quantite === 0 ? '#E05A5A' : product.quantite < 10 ? '#D97706' : '#1B8A5A'
                           }}
                         />
                       </div>
                     </div>
 
+                    {/* Badge + flèche */}
                     <div className="product-footer">
-                      <span className={`status-badge ${status.className}`}>
+                      <span className={status.className}>
                         <StatusIcon />
                         {status.label}
                       </span>

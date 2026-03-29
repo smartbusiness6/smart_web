@@ -14,10 +14,12 @@ import {
   LuCreditCard,
   LuChevronUp,
   LuChevronDown,
-  LuSettings
+  LuSettings,
+  LuBook
 } from "react-icons/lu";
 import "./sidebar.css";
-import Logo from '../assets/images/logo-smart.png'
+import Logo from '../assets/images/logo-smart.png';
+import { useAuth } from "../contexts/AuthContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface SidebarProps {
@@ -48,19 +50,16 @@ function NavItem({ icon: Icon, label, badge, path }: NavItemProps) {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Vérifier si l'item est actif
   const isActive = location.pathname === path || 
                    (path !== '/dashboard' && location.pathname.startsWith(path));
 
   return (
     <div 
       className={`nav-item${isActive ? " nav-item--active" : ""}`} 
-      onClick={() => {
-        navigate(path);
-      }}
+      onClick={() => navigate(path)}
     >
       <span className="nav-item__icon">
-        <Icon size={16} />
+        <Icon size={18} strokeWidth={1.5} />
       </span>
       <span>{label}</span>
       {badge != null && badge > 0 && (
@@ -74,8 +73,8 @@ function NavItem({ icon: Icon, label, badge, path }: NavItemProps) {
 function ProfileMenuItem({ icon: Icon, label, onClick, color }: ProfileMenuItemProps) {
   return (
     <div className="profile-menu-item" onClick={onClick}>
-      <Icon size={14} color={color || "rgba(255,255,255,0.6)"} />
-      <span style={{ color: color || "rgba(255,255,255,0.8)" }}>{label}</span>
+      <Icon size={14} color={color || "var(--sb-text-muted)"} />
+      <span style={{ color: color || "var(--sb-text-muted)" }}>{label}</span>
     </div>
   );
 }
@@ -92,6 +91,7 @@ export default function Sidebar({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Obtenir le prénom et les initiales
   const firstName = userName?.split(' ')[0] || "Admin";
@@ -122,7 +122,8 @@ export default function Sidebar({
     { label: "Stock", icon: LuPackage, path: "/stock" },
     { label: "Reports", icon: LuTriangleAlert, badge: alertesStock, path: "/report" },
     { label: "Finance", icon: LuWallet, path: "/finance" },
-    { label: "RH", icon: LuUser, path: "/rh" }
+    { label: "RH", icon: LuUser, path: "/rh" },
+    { label: "Formations", icon: LuBook, path: "/formation" }
   ];
 
   const handleLogout = () => {
@@ -143,7 +144,7 @@ export default function Sidebar({
   };
 
   const handleProfile = () => {
-    navigate('/profile');
+    navigate(`/rh/${user?.id}`);
     setIsProfileMenuOpen(false);
   };
 

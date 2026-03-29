@@ -1,21 +1,22 @@
 /* src/pages/rh/update/update-user.css */
 
 :root {
-  --primary: #079e7d;
-  --primary-dark: #048a6b;
-  --primary-light: #e6f7f2;
-  --success: #10b981;
+  --primary: #2E86AB;
+  --primary-dark: #17A8B8;
+  --primary-light: #E0F2F7;
+  --accent: #1B8A5A;
+  --success: #1B8A5A;
   --warning: #f59e0b;
-  --danger: #ef4444;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-800: #1f2937;
+  --danger: #E05A5A;
+  --gray-50: #f4f7fa;
+  --gray-100: #f0f4f8;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e2937;
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --radius: 0.5rem;

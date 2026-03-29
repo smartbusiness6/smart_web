@@ -15,6 +15,7 @@ import {
   LuLoader
 } from 'react-icons/lu';
 import './update.css';
+import BASE_URL from '../../config/ApiConfig';
 
 interface ProductData {
   id: number;
@@ -46,8 +47,6 @@ export default function UpdateProductScreen() {
     prixAchat: '',
     prixVente: '',
   });
-
-  const BASE_URL = 'http://localhost:3000'; // À remplacer par votre config
 
   // Charger les données du produit
   useEffect(() => {
@@ -139,7 +138,7 @@ export default function UpdateProductScreen() {
       };
 
       const response = await fetch(`${BASE_URL}/stock/produit/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

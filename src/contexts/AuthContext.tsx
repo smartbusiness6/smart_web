@@ -7,6 +7,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getSocket } from '../hooks/useSocket';
 
 // Types (basés sur tes interfaces existantes)
 export interface User {
@@ -16,10 +17,11 @@ export interface User {
   role: 'ADMIN' | 'SUPERADMIN' | 'USER';
   profession: {
     poste: string;
-  };
-  entreprise: {
-    id: number;
-    nom: string;
+    idEntreprise: number
+    entreprise: {
+      id: number;
+      nom: string;
+    };
   };
 }
 
@@ -41,8 +43,8 @@ const defaultAuthContext: AuthContextType = {
   token: null,
   isAuthenticated: false,
   isLoading: true,
-  login: () => {},
-  logout: () => {},
+  login: () => { },
+  logout: () => { },
 };
 
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
@@ -84,6 +86,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isAuthenticated: true,
           isLoading: false,
         });
+
+        getSocket(storedToken)
       } catch (err) {
         console.error('Erreur lors du parsing de user depuis localStorage', err);
         localStorage.removeItem('token');

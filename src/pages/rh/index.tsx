@@ -131,7 +131,6 @@ export default function RHScreen() {
       {/* Header */}
       <header className="rh-header">
         <div className="header-left">
-          <h1>Gestion des Ressources Humaines</h1>
           <p className="header-subtitle">Gérez votre équipe et leurs informations</p>
         </div>
         <div className="header-actions">
